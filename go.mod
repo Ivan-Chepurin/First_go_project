@@ -1,3 +1,3 @@
-module snippetbox
+module main
 
 go 1.19
