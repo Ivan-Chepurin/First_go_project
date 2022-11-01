@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"log"
+	"main/pkg/models"
+	"main/pkg/models/psql"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,8 +14,9 @@ import (
 )
 
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
+	ErrorLog *log.Logger
+	InfoLog  *log.Logger
+	Snippets psql.SnippetModel
 }
 
 func main() {
@@ -28,12 +31,18 @@ func main() {
 	if err != nil {
 		errorLog.Fatal(err)
 	}
+	defer func(db *sqlx.DB) {
+		err := db.Close()
+		if err != nil {
+			return
+		}
+	}(db)
 
-	defer db.Close()
-
+	db.MustExec(models.SnipSchema)
 	app := &application{
-		errorLog: errorLog,
-		infoLog:  infoLog,
+		ErrorLog: errorLog,
+		InfoLog:  infoLog,
+		Snippets: psql.SnippetModel{DB: db},
 	}
 
 	srv := &http.Server{
