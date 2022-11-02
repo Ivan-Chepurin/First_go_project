@@ -3,7 +3,24 @@
 {{define "title"}}Домашняя страница{{end}}
 
 {{define "main"}}
-<h2>Последние заметки</h2>
-<p>Здесь пока ничего нет!</p>
+    <h2>Последние заметки</h2>
+    {{if .Snippets}}
+    <table>
+        <tr>
+            <th>Заголовок</th>
+            <th>Создан</th>
+            <th>ID</th>
+        </tr>
+        {{range .Snippets}}
+        <tr>
+            <td><a href="/snippet?id={{.Id}}">{{.Title}}</a></td>
+            <td>{{.Created}}</td>
+            <td>{{.Id}}</td>
+        </tr>
+        {{end}}
+    </table>
+    {{else}}
+    <p>Здесь пока ничего нет!</p>
+    {{end}}
 {{end}}
 

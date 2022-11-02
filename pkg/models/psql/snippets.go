@@ -38,7 +38,7 @@ func (sm *SnippetModel) Insert(title, content, expires string) (int, error) {
 
 func (sm *SnippetModel) Get(id int) (models.Snippet, error) {
 	var s models.Snippet
-	err := sm.DB.Get(&s, "SELECT * FROM snippets WHERE CURRENT_TIMESTAMP < expires AND id=$1;", id)
+	err := sm.DB.Get(&s, `SELECT * FROM snippets WHERE CURRENT_TIMESTAMP < expires AND id=$1`, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return s, models.ErrNoRecord
@@ -48,11 +48,13 @@ func (sm *SnippetModel) Get(id int) (models.Snippet, error) {
 	return s, nil
 }
 
-func (sm *SnippetModel) Latest() ([]models.Snippet, error) {
-	var rows []models.Snippet
+func (sm *SnippetModel) Latest() ([]*models.Snippet, error) {
+	var rows []*models.Snippet
 	err := sm.DB.Select(
 		&rows,
-		"SELECT id, title, content, created, expires FROM snippets WHERE  expires > CURRENT_TIMESTAMP ORDER BY created DESC LIMIT 10",
+		`SELECT id, title, content, created, expires 
+		FROM snippets WHERE  expires > CURRENT_TIMESTAMP 
+		ORDER BY created DESC LIMIT 10`,
 	)
 	if err != nil {
 		return nil, err

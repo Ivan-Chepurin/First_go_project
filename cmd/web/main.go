@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"html/template"
 	"log"
 	"main/pkg/models"
 	"main/pkg/models/psql"
@@ -14,9 +15,10 @@ import (
 )
 
 type application struct {
-	ErrorLog *log.Logger
-	InfoLog  *log.Logger
-	Snippets psql.SnippetModel
+	ErrorLog      *log.Logger
+	InfoLog       *log.Logger
+	Snippets      *psql.SnippetModel
+	TemplateCache map[string]*template.Template
 }
 
 func main() {
@@ -38,11 +40,17 @@ func main() {
 		}
 	}(db)
 
+	templateCache, err := newTemplateCache("./ui/html/")
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	db.MustExec(models.SnipSchema)
 	app := &application{
-		ErrorLog: errorLog,
-		InfoLog:  infoLog,
-		Snippets: psql.SnippetModel{DB: db},
+		ErrorLog:      errorLog,
+		InfoLog:       infoLog,
+		Snippets:      &psql.SnippetModel{DB: db},
+		TemplateCache: templateCache,
 	}
 
 	srv := &http.Server{
